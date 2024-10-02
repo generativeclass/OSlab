@@ -26,7 +26,7 @@ void createProcessTree(int level) {
 }
 
 int main() {
-    printf("Parent process (PID: %d, Level: 3)\n", getpid());
+    printf("Main Process process (PID: %d)\n", getpid());
 
     // Start process tree creation from level 3 (root parent at level 3)
     createProcessTree(3);
