@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdlib.h>
-
+#include <sys/wait.h>
 void createProcessTree(int level) {
     if (level > 0) {
         pid_t pid1 = fork();  // First child
