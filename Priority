@@ -1,0 +1,118 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Process {
+    int id;     
+    int bt;      // Burst Time
+    int at;      // Arrival Time
+    int wt;      // Waiting Time
+    int tat;     // Turn Around Time
+    int priority; // Priority
+};
+
+int compare(const void *a, const void *b) {
+    struct Process *p1 = (struct Process *)a;
+    struct Process *p2 = (struct Process *)b;
+
+    if (p1->at == p2->at) {
+        return p1->priority - p2->priority; 
+    }
+    return p1->at - p2->at; 
+}
+
+void findAvgTime(struct Process processes[], int n) {
+    int total_wt = 0, total_tat = 0;
+    int completed = 0, currentTime = 0;
+
+    printf("\nGantt Chart:\n");
+    printf("----------------------------------------------------\n");
+    printf("|");
+
+    while (completed < n) {
+        int idx = -1;
+        int highest_priority = 1e9;
+
+        // Find the process with the highest priority that is ready to execute
+        for (int i = 0; i < n; i++) {
+            if (processes[i].at <= currentTime && processes[i].wt == -1) {
+                if (processes[i].priority < highest_priority) {
+                    highest_priority = processes[i].priority;
+                    idx = i;
+                }
+            }
+        }
+
+        if (idx != -1) {
+            // Process is selected to run
+            processes[idx].wt = currentTime - processes[idx].at;
+            processes[idx].tat = processes[idx].wt + processes[idx].bt;
+            total_wt += processes[idx].wt;
+            total_tat += processes[idx].tat;
+
+            printf(" P%d |", processes[idx].id);
+            currentTime += processes[idx].bt;
+            completed++;
+        } else {
+            // No process is ready, just increment current time
+            currentTime++;
+        }
+    }
+
+    printf("\n----------------------------------------------------\n");
+    printf("0");
+    currentTime = 0;
+
+    for (int i = 0; i < n; i++) {
+        currentTime += processes[i].bt;
+        printf("    %d", currentTime);
+    }
+
+    printf("\n");
+
+    // Display results
+    printf("\nProcesses   Arrival time   Burst time   Waiting time   Turn around time   Priority\n");
+    for (int i = 0; i < n; i++) {
+        printf("   %d           %d             %d             %d               %d               %d\n",
+               processes[i].id, processes[i].at, processes[i].bt, processes[i].wt,
+               processes[i].tat, processes[i].priority);
+    }
+
+    float avg_wt = (float)total_wt / n;
+    float avg_tat = (float)total_tat / n;
+
+    printf("Average waiting time = %.2f\n", avg_wt);
+    printf("Average turn around time = %.2f\n", avg_tat);
+}
+
+int main() {
+    int n;
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    struct Process *processes = malloc(n * sizeof(struct Process));
+    
+
+    printf("\nInput the arrival times:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &processes[i].at);
+        processes[i].id = i + 1; 
+        processes[i].wt = -1;    
+    }
+
+    printf("Input the process burst times:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &processes[i].bt);
+    }
+
+    printf("Input the process priorities (lower number indicates higher priority):\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &processes[i].priority);
+    }
+    
+    // Sort processes by arrival time and then by priority
+    qsort(processes, n, sizeof(struct Process), compare);
+    findAvgTime(processes, n);
+
+    free(processes);
+    return 0;
+}
