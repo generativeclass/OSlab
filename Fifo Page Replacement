@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int n;
+
+    // Input number of pages
+    printf("Enter the number of pages: ");
+    scanf("%d", &n);
+
+    int* pages = malloc(n * sizeof(int));
+    if (pages == NULL) {
+        printf("Memory allocation failed!\n");
+        return 1;
+    }
+
+    // Input the page references
+    printf("Enter the page references:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &pages[i]);
+    }
+
+    // Input frame capacity
+    int capacity;
+    printf("Enter the frame capacity: ");
+    scanf("%d", &capacity);
+
+    // Initialize variables
+    int s[capacity];  // Page frame
+    int page_faults = 0, hit = 0, front = 0, size = 0;
+
+    // Iterate over the page references
+    for (int i = 0; i < n; i++) {
+        int found = 0;
+
+        // Check if the page is already in the frame
+        for (int j = 0; j < size; j++) {
+            if (s[j] == pages[i]) {
+                hit++;
+                found = 1;
+                break;
+            }
+        }
+
+        // If page is not found (page fault occurs)
+        if (!found) {
+            page_faults++;
+
+            // If there is space in the frame
+            if (size < capacity) {
+                s[size++] = pages[i];
+            }
+            // If frame is full, replace the oldest page (FIFO)
+            else {
+                s[front] = pages[i];
+                front = (front + 1) % capacity;
+            }
+        }
+    }
+
+    // Output the result
+    printf("\nTotal Page Faults: %d\n", page_faults);
+    printf("Total Hits: %d\n", hit);
+
+    // Free allocated memory
+    free(pages);
+    return 0;
+}
