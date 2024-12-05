@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int n;
+
+    // Input: Number of pages
+    printf("Enter the number of pages: ");
+    scanf("%d", &n);
+
+    int pages[n];
+
+    // Input: Page reference sequence
+    printf("Enter the page reference sequence:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &pages[i]);
+    }
+
+    // Input: Capacity of the frame
+    int capacity;
+    printf("Enter the frame capacity: ");
+    scanf("%d", &capacity);
+
+    int s[capacity];         // Page frame
+    int indexes[capacity];   // Last used indexes for pages in frame
+    int page_faults = 0, hit = 0, size = 0;
+
+    // Process each page
+    for (int i = 0; i < n; i++) {
+        int found = 0;
+
+        // Check if the page is already in the frame (Page Hit)
+        for (int j = 0; j < size; j++) {
+            if (s[j] == pages[i]) {
+                hit++;
+                found = 1;
+                indexes[j] = i;  // Update the last used index
+                break;
+            }
+        }
+
+        // If the page is not found (Page Fault)
+        if (!found) {
+            page_faults++;
+
+            // If there is space in the frame, add the page
+            if (size < capacity) {
+                s[size] = pages[i];
+                indexes[size] = i;
+                size++;
+            } else {
+                // Find the Least Recently Used page and replace it
+                int lru = 0;
+                for (int j = 1; j < size; j++) {
+                    if (indexes[j] < indexes[lru]) {
+                        lru = j;
+                    }
+                }
+                s[lru] = pages[i];
+                indexes[lru] = i;
+            }
+        }
+    }
+
+    // Output the total page faults and hits
+    printf("\nTotal Page Faults: %d\n", page_faults);
+    printf("Total Hits: %d\n", hit);
+
+    return 0;
+}
