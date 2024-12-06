@@ -1,30 +1,39 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <fcntl.h>
+#include <string.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define FIFO_FILE "/tmp/myfifo"
-
 int main() {
-    char buffer[100];
     int fd;
-
-    // Open FIFO for reading
-    fd = open(FIFO_FILE, O_RDONLY);
-    if (fd == -1) {
-        perror("open");
-        exit(EXIT_FAILURE);
+    char *myfifo = "/tmp/myfifo";
+    
+    // Create the FIFO (named pipe)
+    mkfifo(myfifo, 0666);
+    
+    char str1[80], str2[80];
+    
+    while (1) {
+        // Open FIFO for reading
+        fd = open(myfifo, O_RDONLY);
+        
+        // Read message from user1
+        read(fd, str1, 80);
+        printf("User1: %s\n", str1);
+        close(fd);
+        
+        // Open FIFO for writing response
+        fd = open(myfifo, O_WRONLY);
+        
+        // Input response message
+        printf("You: ");
+        fgets(str2, 80, stdin);
+        
+        // Write response to the FIFO
+        write(fd, str2, strlen(str2) + 1);
+        close(fd);
     }
 
-    // Read from the FIFO
-    read(fd, buffer, sizeof(buffer));
-
-    // Print the received message
-    printf("Received message: %s\n", buffer);
-
-    // Close the FIFO
-    close(fd);
-    
     return 0;
 }
